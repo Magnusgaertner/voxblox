@@ -10,7 +10,7 @@
     <param name="publish_esdf_map" value="true" />
     <param name="publish_tsdf_info" value="true" />
     <param name="use_tf_transforms" value="true" />
-    <param name="update_mesh_every_n_sec" value="10" />
+    <param name="update_mesh_every_n_sec" value="1" />
     <param name="min_time_between_msgs_sec" value="0" />
     <param name="max_block_distance_from_body" value="3.0" />
     <param name="max_integration_time_s" value="1" />
