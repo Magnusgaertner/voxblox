@@ -148,7 +148,7 @@ void EsdfServer::publishMap(const bool reset_remote_map) {
     timing::Timer publish_map_timer("map/publish_esdf");
     voxblox_msgs::Layer layer_msg;
     serializeLayerAsMsg<EsdfVoxel>(this->esdf_map_->getEsdfLayer(),
-                                   only_updated, &layer_msg);
+                                   only_updated, &layer_msg); //TODO this can be used to use diff only
     if (reset_remote_map) {
       layer_msg.action = static_cast<uint8_t>(MapDerializationAction::kReset);
     }
