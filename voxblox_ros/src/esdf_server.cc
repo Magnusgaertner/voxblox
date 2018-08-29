@@ -1,4 +1,6 @@
 #include <voxblox_ros/conversions.h>
+#include <voxblox_ros/esdf_server.h>
+
 
 #include "voxblox_ros/esdf_server.h"
 #include "voxblox_ros/ros_params.h"
@@ -245,5 +247,11 @@ void EsdfServer::clear() {
   constexpr bool kResetRemoteMap = true;
   publishMap(kResetRemoteMap);
 }
+
+    void EsdfServer::insertPointcloud(const sensor_msgs::PointCloud2::Ptr &pointcloud) {
+      TsdfServer::insertPointcloud(pointcloud);
+      updateEsdf();
+      publishPointclouds();
+    }
 
 }  // namespace voxblox

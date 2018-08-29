@@ -497,6 +497,7 @@ void TsdfServer::publishPointclouds() {
   publishAllUpdatedTsdfVoxels();
   publishTsdfSurfacePoints();
   publishTsdfOccupiedNodes();
+  publishMap(false);
 }
 
 void TsdfServer::updateMesh() {
@@ -630,7 +631,8 @@ bool TsdfServer::publishTsdfMapCallback(std_srvs::Empty::Request& /*request*/,
 }
 
 void TsdfServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
-  updateMesh();
+ // updateMesh();
+  publishPointclouds();
 }
 
 void TsdfServer::clear() {
