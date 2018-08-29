@@ -28,7 +28,7 @@ class EsdfServer : public TsdfServer {
 
   bool generateEsdfCallback(std_srvs::Empty::Request& request,     // NOLINT
                             std_srvs::Empty::Response& response);  // NOLINT
-
+  virtual void insertPointcloud(const sensor_msgs::PointCloud2::Ptr& pointcloud);
   virtual void updateMesh();
   virtual void publishPointclouds();
   virtual void newPoseCallback(const Transformation& T_G_C);

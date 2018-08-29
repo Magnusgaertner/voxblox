@@ -39,7 +39,7 @@ class TsdfServer {
 
   void getServerConfigFromRosParam(const ros::NodeHandle& nh_private);
 
-  void insertPointcloud(const sensor_msgs::PointCloud2::Ptr& pointcloud);
+  virtual void insertPointcloud(const sensor_msgs::PointCloud2::Ptr& pointcloud);
 
   void insertFreespacePointcloud(
       const sensor_msgs::PointCloud2::Ptr& pointcloud);
