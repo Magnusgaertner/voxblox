@@ -30,7 +30,7 @@ EsdfServer::EsdfServer(const ros::NodeHandle& nh,
       nh_private_.advertise<voxblox_msgs::Layer>("esdf_map_out", 1, false);
 
   // Set up subscriber.
-  esdf_map_sub_ = nh_private_.subscribe("esdf_map_in", 1,
+  esdf_map_sub_ = nh_private_.subscribe("esdf_map_in", 4,
                                         &EsdfServer::esdfMapCallback, this);
 
   // Whether to clear each new pose as it comes in, and then set a sphere
