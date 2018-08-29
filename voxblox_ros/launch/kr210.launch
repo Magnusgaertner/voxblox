@@ -1,5 +1,5 @@
 <launch>
-  <arg name="voxel_size" default="0.04"/>
+  <arg name="voxel_size" default="0.1"/>
    <node name="voxblox_node" pkg="voxblox_ros" type="esdf_server" output="screen" args="-alsologtostderr" clear_params="true">
     <remap from="pointcloud" to="/scan_cloud_filtered"/>
     <param name="world_frame" value="world" />
@@ -12,16 +12,15 @@
     <param name="publish_tsdf_info" value="true" />
     <param name="use_tf_transforms" value="true" />
     <param name="update_mesh_every_n_sec" value="1" />
+    <param name="pointcloud_queue_size" value="20" />
     <param name="min_time_between_msgs_sec" value="0" />
-    <param name="max_block_distance_from_body" value="3.0" />
-    <param name="max_integration_time_s" value="1" />
-    <param name="max_ray_length_m" value="3.0" />
+    <param name="max_block_distance_from_body" value="10.0" />
+    <param name="max_integration_time_s" value="3" />
+    <param name="max_ray_length_m" value="6.0" />
     <param name="method" value="fast" />
     <param name="use_const_weight" value="false" />
     <param name="allow_clear" value="true" />
     <param name="verbose" value="true" />
-    <!--remap from="transform" to="/kinect/vrpn_client/estimated_transform" /-->
-    <!--rosparam file="$(find voxblox_ros)/cfg/cow_and_lady.yaml"/-->
     <param name="mesh_filename" value="$(find voxblox_ros)/mesh_results/$(anon argo).ply" />
   </node>
 
