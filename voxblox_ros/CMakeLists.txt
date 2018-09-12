@@ -52,6 +52,9 @@ cs_add_executable(visualize_tsdf
 )
 target_link_libraries(visualize_tsdf ${PROJECT_NAME})
 
+
+cs_add_executable(moveit_integration_test src/moveit_integration_test.cc)
+target_link_libraries(moveit_integration_test ${PROJECT_NAME})
 ##########
 # EXPORT #
 ##########
