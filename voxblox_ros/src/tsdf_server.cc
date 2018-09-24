@@ -460,8 +460,8 @@ bool TsdfServer::publishTsdfMapCallback(
 }
 
 void TsdfServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
- // updateMesh();
-  publishPointclouds();
+  updateMesh();
+  //publishPointclouds();
 }
 
 void TsdfServer::clear() {

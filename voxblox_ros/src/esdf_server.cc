@@ -71,6 +71,9 @@ EsdfServer::EsdfServer(const ros::NodeHandle& nh,
   esdf_map_sub_ = nh_private_.subscribe("esdf_map_in", 4,
                                         &EsdfServer::esdfMapCallback, this);
 
+  generate_esdf_srv_ = nh_private_.advertiseService(
+      "generate_esdf", &EsdfServer::generateEsdfCallback, this);
+
   // Whether to clear each new pose as it comes in, and then set a sphere
   // around it to occupied.
   nh_private_.param("clear_sphere_for_planning", clear_sphere_for_planning_,
@@ -244,8 +247,8 @@ void EsdfServer::clear() {
 
     void EsdfServer::insertPointcloud(const sensor_msgs::PointCloud2::Ptr &pointcloud) {
       TsdfServer::insertPointcloud(pointcloud);
-      updateEsdf();
-      publishPointclouds();
+     // updateEsdf();
+     // publishPointclouds();
     }
 
 }  // namespace voxblox
