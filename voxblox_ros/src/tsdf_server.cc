@@ -631,8 +631,8 @@ bool TsdfServer::publishTsdfMapCallback(std_srvs::Empty::Request& /*request*/,
 }
 
 void TsdfServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
- // updateMesh();
-  publishPointclouds();
+  updateMesh();
+  //publishPointclouds();
 }
 
 void TsdfServer::clear() {
