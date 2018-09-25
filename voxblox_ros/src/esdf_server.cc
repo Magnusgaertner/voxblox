@@ -40,9 +40,14 @@ EsdfServer::EsdfServer(const ros::NodeHandle& nh,
   nh_private_.param("clear_sphere_for_planning", clear_sphere_for_planning_,
                     clear_sphere_for_planning_);
   nh_private_.param("publish_esdf_map", publish_esdf_map_, publish_esdf_map_);
+
+  init_esdf_update_policy();
+
+
 }
 
-EsdfServer::EsdfServer(const ros::NodeHandle& nh,
+
+    EsdfServer::EsdfServer(const ros::NodeHandle& nh,
                        const ros::NodeHandle& nh_private)
     : TsdfServer(nh, nh_private),
       clear_sphere_for_planning_(false),
@@ -79,8 +84,25 @@ EsdfServer::EsdfServer(const ros::NodeHandle& nh,
   nh_private_.param("clear_sphere_for_planning", clear_sphere_for_planning_,
                     clear_sphere_for_planning_);
   nh_private_.param("publish_esdf_map", publish_esdf_map_, publish_esdf_map_);
+
+  init_esdf_update_policy();
 }
 
+
+    void EsdfServer::init_esdf_update_policy() {
+      nh_private_.param("esdf_update_policy", update_policy, std::__cxx11::string("none"));
+
+
+      if(!update_policy.compare("timed")){
+        update_timer = nh_private_.createTimer(ros::Duration(0.1), &EsdfServer::on_timed_esdf_update, this);
+        update_timer.start();
+      }
+    }
+
+void EsdfServer::on_timed_esdf_update(const ros::TimerEvent&){
+  ROS_ERROR("on timed esdf update called");
+  updateEsdf();
+}
 void EsdfServer::publishAllUpdatedEsdfVoxels() {
   // Create a pointcloud with distance = intensity.
   pcl::PointCloud<pcl::PointXYZI> pointcloud;
@@ -247,7 +269,10 @@ void EsdfServer::clear() {
 
     void EsdfServer::insertPointcloud(const sensor_msgs::PointCloud2::Ptr &pointcloud) {
       TsdfServer::insertPointcloud(pointcloud);
-     // updateEsdf();
+      if(!update_policy.compare("on_integration")){
+        ROS_ERROR("updating esdf on integration");
+        updateEsdf();
+      }
      // publishPointclouds();
     }
 
