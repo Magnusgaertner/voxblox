@@ -89,6 +89,9 @@ class EsdfServer : public TsdfServer {
 
   bool clear_sphere_for_planning_;
   bool publish_esdf_map_;
+  std::string update_policy;
+  ros::Timer update_timer;
+  void on_timed_esdf_update(const ros::TimerEvent&);
   bool publish_traversable_;
   float traversability_radius_;
   bool incremental_update_;
@@ -96,6 +99,8 @@ class EsdfServer : public TsdfServer {
   // ESDF maps.
   std::shared_ptr<EsdfMap> esdf_map_;
   std::unique_ptr<EsdfIntegrator> esdf_integrator_;
+
+    void init_esdf_update_policy();
 };
 
 }  // namespace voxblox

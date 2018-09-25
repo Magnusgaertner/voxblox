@@ -67,8 +67,25 @@ void EsdfServer::setupRos() {
                     publish_traversable_);
   nh_private_.param("traversability_radius", traversability_radius_,
                     traversability_radius_);
+
+  init_esdf_update_policy();
 }
 
+
+    void EsdfServer::init_esdf_update_policy() {
+      nh_private_.param("esdf_update_policy", update_policy, std::__cxx11::string("none"));
+
+
+      if(!update_policy.compare("timed")){
+        update_timer = nh_private_.createTimer(ros::Duration(0.1), &EsdfServer::on_timed_esdf_update, this);
+        update_timer.start();
+      }
+    }
+
+void EsdfServer::on_timed_esdf_update(const ros::TimerEvent&){
+  ROS_ERROR("on timed esdf update called");
+  updateEsdf();
+}
 void EsdfServer::publishAllUpdatedEsdfVoxels() {
   // Create a pointcloud with distance = intensity.
   pcl::PointCloud<pcl::PointXYZI> pointcloud;
@@ -253,7 +270,10 @@ void EsdfServer::clear() {
 
     void EsdfServer::insertPointcloud(const sensor_msgs::PointCloud2::Ptr &pointcloud) {
       TsdfServer::insertPointcloud(pointcloud);
-     // updateEsdf();
+      if(!update_policy.compare("on_integration")){
+        ROS_ERROR("updating esdf on integration");
+        updateEsdf();
+      }
      // publishPointclouds();
     }
 
