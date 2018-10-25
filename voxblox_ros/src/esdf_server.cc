@@ -4,7 +4,7 @@
 
 #include "voxblox_ros/esdf_server.h"
 #include "voxblox_ros/ros_params.h"
-
+#include <swri_profiler/profiler.h>
 namespace voxblox {
 
 EsdfServer::EsdfServer(const ros::NodeHandle& nh,
@@ -203,6 +203,7 @@ bool EsdfServer::loadMap(const std::string& file_path) {
 }
 
 void EsdfServer::updateEsdf() {
+  SWRI_PROFILE("updateEsdf");
   if (tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks() > 0) {
     const bool clear_updated_flag_esdf = true;
     esdf_integrator_->updateFromTsdfLayer(clear_updated_flag_esdf);

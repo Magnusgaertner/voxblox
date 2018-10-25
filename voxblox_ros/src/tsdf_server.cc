@@ -2,6 +2,7 @@
 #include <minkindr_conversions/kindr_tf.h>
 #include "voxblox_ros/ros_params.h"
 
+#include <swri_profiler/profiler.h>
 #include "voxblox_ros/tsdf_server.h"
 
 namespace voxblox {
@@ -370,7 +371,8 @@ bool TsdfServer::getNextPointcloudFromQueue(
 
 void TsdfServer::insertPointcloud(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {
-  if (pointcloud_msg_in->header.stamp - last_msg_time_ptcloud_ >
+    SWRI_PROFILE("tsdfserver::insertPointcloud");
+    if (pointcloud_msg_in->header.stamp - last_msg_time_ptcloud_ >
       min_time_between_msgs_) {
     last_msg_time_ptcloud_ = pointcloud_msg_in->header.stamp;
     // So we have to process the queue anyway... Push this back.
@@ -383,8 +385,11 @@ void TsdfServer::insertPointcloud(
   while (
       getNextPointcloudFromQueue(&pointcloud_queue_, &pointcloud_msg, &T_G_C)) {
     constexpr bool is_freespace_pointcloud = false;
-    processPointCloudMessageAndInsert(pointcloud_msg, T_G_C,
-                                      is_freespace_pointcloud);
+    {
+        SWRI_PROFILE("processPointCloudMessageAndInsert");
+        processPointCloudMessageAndInsert(pointcloud_msg, T_G_C,
+                                          is_freespace_pointcloud);
+    }
     processed_any = true;
   }
 
@@ -393,11 +398,17 @@ void TsdfServer::insertPointcloud(
   }
 
   if (publish_tsdf_info_) {
-    publishAllUpdatedTsdfVoxels();
-    publishTsdfSurfacePoints();
-    publishTsdfOccupiedNodes();
+    {SWRI_PROFILE("publishAllUpdatedTsdfVoxels");
+    publishAllUpdatedTsdfVoxels();}
+
+    {SWRI_PROFILE("publishTsdfSurfacePoints");
+    publishTsdfSurfacePoints();}
+
+    {SWRI_PROFILE("publishTsdfOccupiedNodes");
+    publishTsdfOccupiedNodes();}
   }
   if (publish_slices_) {
+    SWRI_PROFILE("publish_slices_");
     publishSlices();
   }
 
