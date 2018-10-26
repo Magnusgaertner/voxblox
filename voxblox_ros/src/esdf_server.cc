@@ -269,7 +269,7 @@ void EsdfServer::clear() {
   publishMap(kResetRemoteMap);
 }
 
-    void EsdfServer::insertPointcloud(const sensor_msgs::PointCloud2::Ptr &pointcloud) {
+    void EsdfServer::insertPointcloud(const sensor_msgs::PointCloud2::ConstPtr &pointcloud) {
       TsdfServer::insertPointcloud(pointcloud);
       if(!update_policy.compare("on_integration")){
         ROS_ERROR("updating esdf on integration");

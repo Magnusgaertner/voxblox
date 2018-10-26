@@ -31,7 +31,7 @@ class EsdfServer : public TsdfServer {
   virtual void publishSlices();
   void publishTraversable();
 
-  virtual void insertPointcloud(const sensor_msgs::PointCloud2::Ptr& pointcloud);
+  virtual void insertPointcloud(const sensor_msgs::PointCloud2::ConstPtr& pointcloud);
   virtual void updateMesh();
   virtual void publishPointclouds();
   virtual void newPoseCallback(const Transformation& T_G_C);

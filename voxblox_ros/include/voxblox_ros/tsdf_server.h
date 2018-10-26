@@ -45,13 +45,13 @@ class TsdfServer {
 
   void getServerConfigFromRosParam(const ros::NodeHandle& nh_private);
 
-  virtual void insertPointcloud(const sensor_msgs::PointCloud2::Ptr& pointcloud);
+  virtual void insertPointcloud(const sensor_msgs::PointCloud2::ConstPtr& pointcloud);
 
   void insertFreespacePointcloud(
-      const sensor_msgs::PointCloud2::Ptr& pointcloud);
+      const sensor_msgs::PointCloud2::ConstPtr& pointcloud);
 
   virtual void processPointCloudMessageAndInsert(
-      const sensor_msgs::PointCloud2::Ptr& pointcloud_msg,
+      const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg,
       const Transformation& T_G_C, const bool is_freespace_pointcloud);
 
   void integratePointcloud(const Transformation& T_G_C,
@@ -91,6 +91,7 @@ class TsdfServer {
   void updateMeshEvent(const ros::TimerEvent& event);
 
   std::shared_ptr<TsdfMap> getTsdfMapPtr() { return tsdf_map_; }
+  std::shared_ptr<const TsdfMap> getTsdfMapPtr() const{ return tsdf_map_; }
 
   // Accessors for setting and getting parameters.
   double getSliceLevel() const { return slice_level_; }
@@ -116,8 +117,8 @@ class TsdfServer {
   // Gets the next pointcloud that has an available transform to process from
   // the queue.
   bool getNextPointcloudFromQueue(
-      std::queue<sensor_msgs::PointCloud2::Ptr>* queue,
-      sensor_msgs::PointCloud2::Ptr* pointcloud_msg, Transformation* T_G_C);
+      std::queue<sensor_msgs::PointCloud2::ConstPtr>* queue,
+      sensor_msgs::PointCloud2::ConstPtr* pointcloud_msg, Transformation* T_G_C);
 
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
@@ -225,8 +226,8 @@ class TsdfServer {
   Transformer transformer_;
   // Queue of incoming pointclouds, in case the transforms can't be immediately
   // resolved.
-  std::queue<sensor_msgs::PointCloud2::Ptr> pointcloud_queue_;
-  std::queue<sensor_msgs::PointCloud2::Ptr> freespace_pointcloud_queue_;
+  std::queue<sensor_msgs::PointCloud2::ConstPtr> pointcloud_queue_;
+  std::queue<sensor_msgs::PointCloud2::ConstPtr> freespace_pointcloud_queue_;
 
   // Last message times for throttling input.
   ros::Time last_msg_time_ptcloud_;
