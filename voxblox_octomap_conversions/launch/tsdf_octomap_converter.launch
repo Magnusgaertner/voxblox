@@ -1,0 +1,6 @@
+<launch>
+    <node name="tsdf_octomap_converter" pkg="voxblox_octomap_conversions" type="voxblox_octomap_converter" >
+        <remap from="/tsdf_octomap_converter/layer_in" to="/move_group/voxblox/tsdf_map_out"/>
+    </node>
+
+</launch>
