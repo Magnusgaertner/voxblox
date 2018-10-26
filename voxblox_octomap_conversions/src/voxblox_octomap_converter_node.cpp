@@ -3,12 +3,12 @@
 //
 
 #include <voxblox_octomap_conversions/octomap_conversions.h>
-
+#include <ros/ros.h>
+#include <voxblox_ros/esdf_server.h>
 int main(){
-/*
-  voxblox::EsdfServer server;
-  server
+
+  voxblox::EsdfServer server(ros::NodeHandle(""), ros::NodeHandle(""));
   octomap_msgs::Octomap octomap_msg;
 
-  voxblox::serializeLayerAsOctomapMsg(  map.getEsdfLayer(), &octomap_msg,1);*/
+  voxblox::serializeLayerAsOctomapMsg(  server.getEsdfMapPtr()->getEsdfLayer(), &octomap_msg,1);
 }

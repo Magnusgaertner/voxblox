@@ -16,6 +16,7 @@
 
 namespace voxblox {
 
+
 // Declarations
   template <typename VoxelType>
   void serializeLayerAsOctomapMsg(const Layer<VoxelType> &layer,
@@ -47,4 +48,4 @@ namespace voxblox {
 
 #endif  // VOXBLOX_OCTOMAP_ROS_CONVERSIONS_H_
 
-#include <voxblox_octomap_conversions/octomap_conversions.tpp>
+#include <voxblox_octomap_conversions/octomap_conversions_inl.h>
