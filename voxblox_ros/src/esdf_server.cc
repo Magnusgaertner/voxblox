@@ -74,6 +74,7 @@ void EsdfServer::setupRos() {
 
     void EsdfServer::init_esdf_update_policy() {
       nh_private_.param("esdf_update_policy", update_policy, std::__cxx11::string("none"));
+      nh_private_.param("update_esdf_every_n_scans", update_esdf_every_n_scans, 1);
 
 
       if(!update_policy.compare("timed")){
@@ -271,9 +272,15 @@ void EsdfServer::clear() {
 
     void EsdfServer::insertPointcloud(const sensor_msgs::PointCloud2::ConstPtr &pointcloud) {
       TsdfServer::insertPointcloud(pointcloud);
-      if(!update_policy.compare("on_integration")){
-        ROS_ERROR("updating esdf on integration");
-        updateEsdf();
+      if(!update_policy.compare("on_integration")) {
+
+        if(scan_num == update_esdf_every_n_scans){
+          ROS_ERROR("updating esdf on integration");
+          updateEsdf();
+          scan_num = 0;
+        }
+        scan_num++;
+
       }
      // publishPointclouds();
     }

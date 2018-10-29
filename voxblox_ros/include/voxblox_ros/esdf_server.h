@@ -90,6 +90,8 @@ class EsdfServer : public TsdfServer {
   bool clear_sphere_for_planning_;
   bool publish_esdf_map_;
   std::string update_policy;
+  int  update_esdf_every_n_scans = 1;
+  int scan_num = 1;
   ros::Timer update_timer;
   void on_timed_esdf_update(const ros::TimerEvent&);
   bool publish_traversable_;
