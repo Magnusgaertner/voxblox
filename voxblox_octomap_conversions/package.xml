@@ -17,5 +17,5 @@
   <depend>voxblox_ros</depend>
   <depend>octomap</depend>
   <depend>octomap_msgs</depend>
-  <depend>swri_profiler</depend>
+  <depend>swri_profiler</depend><!--#optional dependency, used only for profiling, define SWRI_ENABLED to enable profiling-->
 </package>
