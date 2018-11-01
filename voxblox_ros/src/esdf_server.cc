@@ -78,7 +78,9 @@ void EsdfServer::setupRos() {
 
 
       if(!update_policy.compare("timed")){
-        update_timer = nh_private_.createTimer(ros::Duration(0.1), &EsdfServer::on_timed_esdf_update, this);
+        double duration;
+        nh_.param("esdf_update_rate", duration , 1.0);
+        update_timer = nh_private_.createTimer(ros::Duration(1/duration), &EsdfServer::on_timed_esdf_update, this);
         update_timer.start();
       }
     }
