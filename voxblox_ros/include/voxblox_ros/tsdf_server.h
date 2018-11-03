@@ -139,6 +139,7 @@ class TsdfServer {
 
   // Pointcloud visualization settings.
   double slice_level_;
+  double slice_axis_;
 
   // If the system should subscribe to a pointcloud giving points in freespace
   bool use_freespace_pointcloud_;

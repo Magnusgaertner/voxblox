@@ -7,7 +7,7 @@
 #include <voxblox/core/esdf_map.h>
 #include <voxblox/integrator/esdf_integrator.h>
 #include <voxblox_msgs/Layer.h>
-
+#include "voxblox_ros/interactive_slider.h"
 #include "voxblox_ros/tsdf_server.h"
 
 namespace voxblox {
@@ -72,7 +72,7 @@ class EsdfServer : public TsdfServer {
  protected:
   // Sets up publishing and subscribing. Should only be called from constructor.
   void setupRos();
-
+  std::unique_ptr<voxblox::InteractiveSlider> inspectionSlider;
   // Publish markers for visualization.
   ros::Publisher esdf_pointcloud_pub_;
   ros::Publisher esdf_slice_pub_;

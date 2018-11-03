@@ -8,7 +8,7 @@
 namespace voxblox {
 
 void TsdfServer::getServerConfigFromRosParam(
-    const ros::NodeHandle& nh_private) {
+    const ros::NodeHandle& nh_private) {SWRI_PROFILE("getServerConfigFromRosParam");
   // Before subscribing, determine minimum time between messages.
   // 0 by default.
   double min_time_between_msgs_sec = 0.0;
@@ -20,6 +20,7 @@ void TsdfServer::getServerConfigFromRosParam(
                    max_block_distance_from_body_,
                    max_block_distance_from_body_);
   nh_private.param("slice_level", slice_level_, slice_level_);
+  nh_private.param("slice_axis", slice_axis_, slice_axis_);
   nh_private.param("world_frame", world_frame_, world_frame_);
   nh_private.param("publish_tsdf_info", publish_tsdf_info_, publish_tsdf_info_);
   nh_private.param("publish_slices", publish_slices_, publish_slices_);
@@ -95,6 +96,7 @@ TsdfServer::TsdfServer(const ros::NodeHandle& nh,
       icp_corrected_frame_("icp_corrected"),
       pose_corrected_frame_("pose_corrected"),
       max_block_distance_from_body_(std::numeric_limits<FloatingPoint>::max()),
+      slice_axis_(2),
       slice_level_(0.5),
       use_freespace_pointcloud_(false),
       color_map_(new RainbowColorMap()),
@@ -212,7 +214,7 @@ TsdfServer::TsdfServer(const ros::NodeHandle& nh,
 
 void TsdfServer::processPointCloudMessageAndInsert(
     const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg,
-    const Transformation& T_G_C, const bool is_freespace_pointcloud) {
+    const Transformation& T_G_C, const bool is_freespace_pointcloud) {SWRI_PROFILE("processPointCloudMessageAndInsert");
   // Convert the PCL pointcloud into our awesome format.
 
   // Horrible hack fix to fix color parsing colors in PCL.
@@ -344,7 +346,7 @@ void TsdfServer::processPointCloudMessageAndInsert(
 // Checks if we can get the next message from queue.
 bool TsdfServer::getNextPointcloudFromQueue(
     std::queue<sensor_msgs::PointCloud2::ConstPtr>* queue,
-    sensor_msgs::PointCloud2::ConstPtr* pointcloud_msg, Transformation* T_G_C) {
+    sensor_msgs::PointCloud2::ConstPtr* pointcloud_msg, Transformation* T_G_C) {SWRI_PROFILE("getNextPointcloudFromQueue");
   const size_t kMaxQueueSize = 10;
   if (queue->empty()) {
     return false;
@@ -420,7 +422,7 @@ void TsdfServer::insertPointcloud(
 }
 
 void TsdfServer::insertFreespacePointcloud(
-    const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg_in) {
+    const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg_in) {SWRI_PROFILE("insertFreespacePointcloud");
   if (pointcloud_msg_in->header.stamp - last_msg_time_freespace_ptcloud_ >
       min_time_between_msgs_) {
     last_msg_time_freespace_ptcloud_ = pointcloud_msg_in->header.stamp;
@@ -441,13 +443,14 @@ void TsdfServer::insertFreespacePointcloud(
 void TsdfServer::integratePointcloud(const Transformation& T_G_C,
                                      const Pointcloud& ptcloud_C,
                                      const Colors& colors,
-                                     const bool is_freespace_pointcloud) {
+                                     const bool is_freespace_pointcloud) {SWRI_PROFILE("integratePointcloud");
   CHECK_EQ(ptcloud_C.size(), colors.size());
   tsdf_integrator_->integratePointCloud(T_G_C, ptcloud_C, colors,
                                         is_freespace_pointcloud);
 }
 
-void TsdfServer::publishAllUpdatedTsdfVoxels() {
+void TsdfServer::publishAllUpdatedTsdfVoxels() {SWRI_PROFILE("publishAllUpdatedTsdfVoxels");
+  if(!tsdf_pointcloud_pub_.getNumSubscribers())return;
   // Create a pointcloud with distance = intensity.
   pcl::PointCloud<pcl::PointXYZI> pointcloud;
 
@@ -457,7 +460,8 @@ void TsdfServer::publishAllUpdatedTsdfVoxels() {
   tsdf_pointcloud_pub_.publish(pointcloud);
 }
 
-void TsdfServer::publishTsdfSurfacePoints() {
+void TsdfServer::publishTsdfSurfacePoints() {SWRI_PROFILE("publishTsdfSurfacePoints");
+  if(!surface_pointcloud_pub_.getNumSubscribers())return;
   // Create a pointcloud with distance = intensity.
   pcl::PointCloud<pcl::PointXYZRGB> pointcloud;
   const float surface_distance_thresh =
@@ -469,7 +473,8 @@ void TsdfServer::publishTsdfSurfacePoints() {
   surface_pointcloud_pub_.publish(pointcloud);
 }
 
-void TsdfServer::publishTsdfOccupiedNodes() {
+void TsdfServer::publishTsdfOccupiedNodes() {SWRI_PROFILE("publishTsdfOccupiedNodes");
+  if(!occupancy_marker_pub_.getNumSubscribers())return;
   // Create a pointcloud with distance = intensity.
   visualization_msgs::MarkerArray marker_array;
   createOccupancyBlocksFromTsdfLayer(tsdf_map_->getTsdfLayer(), world_frame_,
@@ -477,17 +482,18 @@ void TsdfServer::publishTsdfOccupiedNodes() {
   occupancy_marker_pub_.publish(marker_array);
 }
 
-void TsdfServer::publishSlices() {
+void TsdfServer::publishSlices() {SWRI_PROFILE("publishSlices");
+  if(!tsdf_slice_pub_.getNumSubscribers())return;
   pcl::PointCloud<pcl::PointXYZI> pointcloud;
 
-  createDistancePointcloudFromTsdfLayerSlice(tsdf_map_->getTsdfLayer(), 2,
+  createDistancePointcloudFromTsdfLayerSlice(tsdf_map_->getTsdfLayer(), slice_axis_,
                                              slice_level_, &pointcloud);
 
   pointcloud.header.frame_id = world_frame_;
   tsdf_slice_pub_.publish(pointcloud);
 }
 
-void TsdfServer::publishMap(const bool reset_remote_map) {
+void TsdfServer::publishMap(const bool reset_remote_map) {SWRI_PROFILE("publishMap");
   if (this->tsdf_map_pub_.getNumSubscribers() > 0) {
     const bool only_updated = false;
     timing::Timer publish_map_timer("map/publish_tsdf");
@@ -502,7 +508,7 @@ void TsdfServer::publishMap(const bool reset_remote_map) {
   }
 }
 
-void TsdfServer::publishPointclouds() {
+void TsdfServer::publishPointclouds() {SWRI_PROFILE("publishPointclouds");
   // Combined function to publish all possible pointcloud messages -- surface
   // pointclouds, updated points, and occupied points.
   publishAllUpdatedTsdfVoxels();
@@ -511,7 +517,7 @@ void TsdfServer::publishPointclouds() {
   publishMap(false);
 }
 
-void TsdfServer::updateMesh() {
+void TsdfServer::updateMesh() {SWRI_PROFILE("updateMesh");
   if (verbose_) {
     ROS_INFO("Updating mesh.");
   }
@@ -543,7 +549,7 @@ void TsdfServer::updateMesh() {
   }
 }
 
-bool TsdfServer::generateMesh() {
+bool TsdfServer::generateMesh() {SWRI_PROFILE("generateMesh");
   timing::Timer generate_mesh_timer("mesh/generate");
   const bool clear_mesh = true;
   if (clear_mesh) {
@@ -582,12 +588,12 @@ bool TsdfServer::generateMesh() {
   return true;
 }
 
-bool TsdfServer::saveMap(const std::string& file_path) {
+bool TsdfServer::saveMap(const std::string& file_path) {SWRI_PROFILE("saveMap");
   // Inheriting classes should add saving other layers to this function.
   return io::SaveLayer(tsdf_map_->getTsdfLayer(), file_path);
 }
 
-bool TsdfServer::loadMap(const std::string& file_path) {
+bool TsdfServer::loadMap(const std::string& file_path) {SWRI_PROFILE("loadMap");
   // Inheriting classes should add other layers to load, as this will only
   // load
   // the TSDF layer.
@@ -603,50 +609,50 @@ bool TsdfServer::loadMap(const std::string& file_path) {
 
 bool TsdfServer::clearMapCallback(std_srvs::Empty::Request& /*request*/,
                                   std_srvs::Empty::Response&
-                                  /*response*/) {  // NOLINT
+                                  /*response*/) {SWRI_PROFILE("clearMapCallback");  // NOLINT
   clear();
   return true;
 }
 
 bool TsdfServer::generateMeshCallback(std_srvs::Empty::Request& /*request*/,
                                       std_srvs::Empty::Response&
-                                      /*response*/) {  // NOLINT
+                                      /*response*/) {SWRI_PROFILE("generateMeshCallback");  // NOLINT
   return generateMesh();
 }
 
 bool TsdfServer::saveMapCallback(voxblox_msgs::FilePath::Request& request,
                                  voxblox_msgs::FilePath::Response&
-                                 /*response*/) {  // NOLINT
+                                 /*response*/) {SWRI_PROFILE("saveMapCallback");  // NOLINT
   return saveMap(request.file_path);
 }
 
 bool TsdfServer::loadMapCallback(voxblox_msgs::FilePath::Request& request,
                                  voxblox_msgs::FilePath::Response&
-                                 /*response*/) {  // NOLINT
+                                 /*response*/) {SWRI_PROFILE("loadMapCallback");  // NOLINT
   bool success = loadMap(request.file_path);
   return success;
 }
 
 bool TsdfServer::publishPointcloudsCallback(
     std_srvs::Empty::Request& /*request*/, std_srvs::Empty::Response&
-    /*response*/) {  // NOLINT
+    /*response*/) {SWRI_PROFILE("publishPointcloudsCallback");  // NOLINT
   publishPointclouds();
   return true;
 }
 
 bool TsdfServer::publishTsdfMapCallback(std_srvs::Empty::Request& /*request*/,
                                         std_srvs::Empty::Response&
-                                        /*response*/) {  // NOLINT
+                                        /*response*/) {SWRI_PROFILE("publishTsdfMapCallback");  // NOLINT
   publishMap();
   return true;
 }
 
-void TsdfServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
+void TsdfServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {SWRI_PROFILE("updateMeshEvent");
   updateMesh();
   //publishPointclouds();
 }
 
-void TsdfServer::clear() {
+void TsdfServer::clear() {SWRI_PROFILE("clear");
   tsdf_map_->getTsdfLayerPtr()->removeAllBlocks();
   mesh_layer_->clear();
 
@@ -655,7 +661,7 @@ void TsdfServer::clear() {
   publishMap(kResetRemoteMap);
 }
 
-void TsdfServer::tsdfMapCallback(const voxblox_msgs::Layer& layer_msg) {
+void TsdfServer::tsdfMapCallback(const voxblox_msgs::Layer& layer_msg) {SWRI_PROFILE("tsdfMapCallback");
   bool success =
       deserializeMsgToLayer<TsdfVoxel>(layer_msg, tsdf_map_->getTsdfLayerPtr());
 

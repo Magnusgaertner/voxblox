@@ -7,6 +7,7 @@ namespace voxblox {
 
 InteractiveSlider::InteractiveSlider(
     const std::string& slider_name,
+    const std::string& frame_id,
     const std::function<void(const double& slice_level)>& slider_callback,
     const Point& initial_position,
     const unsigned int free_plane_index,
@@ -18,7 +19,7 @@ InteractiveSlider::InteractiveSlider(
 
   // Create an interactive marker.
   visualization_msgs::InteractiveMarker interactive_marker;
-  interactive_marker.header.frame_id = "map";
+  interactive_marker.header.frame_id = frame_id;
   interactive_marker.header.stamp = ros::Time::now();
   interactive_marker.pose.position.x =
       static_cast<double>(initial_position.x());

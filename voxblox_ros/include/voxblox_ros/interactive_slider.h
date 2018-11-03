@@ -17,6 +17,7 @@ class InteractiveSlider {
 
   InteractiveSlider(
       const std::string& slider_name,
+      const std::string& frame_id,
       const std::function<void(const double& slice_level)>& slider_callback,
       const Point& initial_position,
       const unsigned int free_plane_index,
