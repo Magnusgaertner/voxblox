@@ -100,7 +100,7 @@ void EsdfServer::setupRos() {SWRI_PROFILE("setupRos");
     }
 
 void EsdfServer::on_timed_esdf_update(const ros::TimerEvent&){SWRI_PROFILE("on_timed_esdf_update");
-  ROS_ERROR("on timed esdf update called");
+  //ROS_ERROR("on timed esdf update called");
   updateEsdf();
 }
 void EsdfServer::publishAllUpdatedEsdfVoxels() {SWRI_PROFILE("publishAllUpdatedEsdfVoxels");
