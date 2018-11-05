@@ -104,6 +104,8 @@ void EsdfServer::on_timed_esdf_update(const ros::TimerEvent&){SWRI_PROFILE("on_t
   updateEsdf();
 }
 void EsdfServer::publishAllUpdatedEsdfVoxels() {SWRI_PROFILE("publishAllUpdatedEsdfVoxels");
+  if(!esdf_pointcloud_pub_.getNumSubscribers())  return;
+
   // Create a pointcloud with distance = intensity.
   pcl::PointCloud<pcl::PointXYZI> pointcloud;
 
