@@ -13,6 +13,9 @@
 #include "voxblox/core/common.h"
 #include "voxblox/core/voxel.h"
 
+
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/time_clock.hpp>
 namespace voxblox {
 
 /**
@@ -278,6 +281,8 @@ class Layer {
                          BlockMergingStrategy strategy);
 
   size_t getMemorySize() const;
+
+  boost::posix_time::ptime last_update_;
 
  protected:
   FloatingPoint voxel_size_;

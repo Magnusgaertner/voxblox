@@ -6,7 +6,7 @@
 
 #include <voxblox/core/esdf_map.h>
 #include <voxblox/integrator/esdf_integrator.h>
-#include <voxblox_msgs/Layer.h>
+#include <voxblox_msgs/LayerStamped.h>
 
 #include "voxblox_ros/tsdf_server.h"
 
@@ -47,7 +47,7 @@ class EsdfServer : public TsdfServer {
   void updateEsdfBatch(bool full_euclidean = false);
 
   // Overwrites the layer with what's coming from the topic!
-  void esdfMapCallback(const voxblox_msgs::Layer& layer_msg);
+  void esdfMapCallback(const voxblox_msgs::LayerStamped& layer_msg);
 
   inline std::shared_ptr<EsdfMap> getEsdfMapPtr() { return esdf_map_; }
   inline std::shared_ptr<const EsdfMap> getEsdfMapPtr() const {

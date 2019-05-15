@@ -316,6 +316,7 @@ void TsdfServer::processPointCloudMessageAndInsert(
              (end - start).toSec(),
              tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks());
   }
+  tsdf_map_->getTsdfLayerPtr()->last_update_ = pointcloud_msg->header.stamp.toBoost(); // update the time in the map
 
   timing::Timer block_remove_timer("remove_distant_blocks");
   tsdf_map_->getTsdfLayerPtr()->removeDistantBlocks(

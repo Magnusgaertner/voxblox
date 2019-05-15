@@ -44,7 +44,7 @@ void EsdfServer::setupRos() {
       "traversable", 1, true);
 
   esdf_map_pub_ =
-      nh_private_.advertise<voxblox_msgs::Layer>("esdf_map_out", 1, false);
+      nh_private_.advertise<voxblox_msgs::LayerStamped>("esdf_map_out", 1, false);
 
   // Set up subscriber.
   esdf_map_sub_ = nh_private_.subscribe("esdf_map_in", 1,
@@ -91,6 +91,7 @@ bool EsdfServer::generateEsdfCallback(
     std_srvs::Empty::Request& /*request*/,      // NOLINT
     std_srvs::Empty::Response& /*response*/) {  // NOLINT
   const bool clear_esdf = true;
+  esdf_map_->getEsdfLayerPtr()->last_update_ = tsdf_map_->getTsdfLayerPtr()->last_update_;
   if (clear_esdf) {
     esdf_integrator_->updateFromTsdfLayerBatch();
   } else {
@@ -107,6 +108,7 @@ void EsdfServer::updateMesh() {
   if (incremental_update_ &&
       tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks() > 0) {
     const bool clear_updated_flag_esdf = false;
+    esdf_map_->getEsdfLayerPtr()->last_update_ = tsdf_map_->getTsdfLayerPtr()->last_update_;
     esdf_integrator_->updateFromTsdfLayer(clear_updated_flag_esdf);
   }
   if (publish_pointclouds_) {
@@ -145,13 +147,18 @@ void EsdfServer::publishTraversable() {
 
 void EsdfServer::publishMap(const bool reset_remote_map) {
   if (this->esdf_map_pub_.getNumSubscribers() > 0) {
-    const bool only_updated = false;
+    const bool only_updated = true;
     timing::Timer publish_map_timer("map/publish_esdf");
-    voxblox_msgs::Layer layer_msg;
+    voxblox_msgs::LayerStamped layer_msg;
     serializeLayerAsMsg<EsdfVoxel>(this->esdf_map_->getEsdfLayer(),
-                                   only_updated, &layer_msg);
+                                   only_updated, &layer_msg.layer);
+    
+    auto stamp = esdf_map_->getEsdfLayerPtr()->last_update_;
+    if(stamp.is_not_a_date_time())layer_msg.header.stamp=ros::Time(0);
+    else layer_msg.header.stamp =ros::Time::fromBoost( esdf_map_->getEsdfLayerPtr()->last_update_);
+
     if (reset_remote_map) {
-      layer_msg.action = static_cast<uint8_t>(MapDerializationAction::kReset);
+      layer_msg.layer.action = static_cast<uint8_t>(MapDerializationAction::kReset);
     }
     this->esdf_map_pub_.publish(layer_msg);
     publish_map_timer.Stop();
@@ -183,6 +190,7 @@ bool EsdfServer::loadMap(const std::string& file_path) {
 void EsdfServer::updateEsdf() {
   if (tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks() > 0) {
     const bool clear_updated_flag_esdf = true;
+    esdf_map_->getEsdfLayerPtr()->last_update_ = tsdf_map_->getTsdfLayerPtr()->last_update_;
     esdf_integrator_->updateFromTsdfLayer(clear_updated_flag_esdf);
   }
 }
@@ -190,6 +198,7 @@ void EsdfServer::updateEsdf() {
 void EsdfServer::updateEsdfBatch(bool full_euclidean) {
   if (tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks() > 0) {
     esdf_integrator_->setFullEuclidean(full_euclidean);
+    esdf_map_->getEsdfLayerPtr()->last_update_ = tsdf_map_->getTsdfLayerPtr()->last_update_;
     esdf_integrator_->updateFromTsdfLayerBatch();
   }
 }
@@ -221,9 +230,9 @@ void EsdfServer::newPoseCallback(const Transformation& T_G_C) {
   block_remove_timer.Stop();
 }
 
-void EsdfServer::esdfMapCallback(const voxblox_msgs::Layer& layer_msg) {
+void EsdfServer::esdfMapCallback(const voxblox_msgs::LayerStamped& layer_msg) {
   bool success =
-      deserializeMsgToLayer<EsdfVoxel>(layer_msg, esdf_map_->getEsdfLayerPtr());
+      deserializeMsgToLayer<EsdfVoxel>(layer_msg.layer, esdf_map_->getEsdfLayerPtr());
 
   if (!success) {
     ROS_ERROR_THROTTLE(10, "Got an invalid ESDF map message!");
