@@ -16,16 +16,16 @@ set(PROTO_DEFNS proto/voxblox/Block.proto
                 proto/voxblox/Layer.proto)
 set(PROTO_LIBRARIES "")
 find_package(protobuf_catkin QUIET)
-if (protobuf_catkin_FOUND)
-  message(STATUS "Using protobuf_catkin")
-  PROTOBUF_CATKIN_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
-  set(PROTO_LIBRARIES ${protobuf_catkin_LIBRARIES})
-else()
+#if (protobuf_catkin_FOUND)
+#  message(STATUS "Using protobuf_catkin")
+#  PROTOBUF_CATKIN_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
+#  set(PROTO_LIBRARIES ${protobuf_catkin_LIBRARIES})
+#else()
   message(STATUS "Using system protobuf")
   find_package(Protobuf REQUIRED)
   PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
   set(PROTO_LIBRARIES ${PROTOBUF_LIBRARIES})
-endif()
+#endif()
 
 ####################
 # SET SOURCE FILES #
